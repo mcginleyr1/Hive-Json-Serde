@@ -36,9 +36,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
  * form is a string wrapped in curly braces with colons between the names and
@@ -95,10 +92,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public class JSONObject {
 
-    private static final Log LOG = LogFactory.getLog(JSONObject.class.getName());
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
-     * whilst Java's null is equi   valent to the value that JavaScript calls
+     * whilst Java's null is equivalent to the value that JavaScript calls
      * undefined.
      */
     private static final class Null {
@@ -548,9 +544,8 @@ public class JSONObject {
                         .equalsIgnoreCase("true"))) {
             return true;
         }
-        LOG.info("Failed to convert to Boolean column: " + key + " with value: " + o + " for row:");
-        this.log();
-        return false;
+        throw new JSONException("JSONObject[" + quote(key)
+                + "] is not a Boolean.");
     }
 
     /**
@@ -564,11 +559,11 @@ public class JSONObject {
     public double getDouble(String key) throws JSONException {
         Object o = get(key);
         try {
-            return o instanceof Number ? ((Number) o).doubleValue() : Double.valueOf((String) o).doubleValue();
+            return o instanceof Number ? ((Number) o).doubleValue() : Double
+                    .valueOf((String) o).doubleValue();
         } catch (Exception e) {
-            LOG.info("Failed to convert to Double column: " + key + " with value: " + o + " for row:");
-            this.log();
-            return 0;
+            throw new JSONException("JSONObject[" + quote(key)
+                    + "] is not a number.");
         }
     }
 
@@ -583,13 +578,8 @@ public class JSONObject {
      */
     public int getInt(String key) throws JSONException {
         Object o = get(key);
-        try {
-            return o instanceof Number ? ((Number) o).intValue() : (int) getDouble(key);
-        } catch (Exception e) {
-            LOG.info("Failed to convert to Int column: " + key + " with value: " + o + " for row:");
-            this.log();
-            return 0;
-        }
+        return o instanceof Number ? ((Number) o).intValue()
+                : (int) getDouble(key);
     }
 
     /**
@@ -637,13 +627,8 @@ public class JSONObject {
      */
     public long getLong(String key) throws JSONException {
         Object o = get(key);
-        try {
-            return o instanceof Number ? ((Number) o).longValue() : (long) getDouble(key);
-        } catch (Exception e) {
-            LOG.info("Failed to convert to Long column: " + key + " with value: " + o + " for row:");
-            this.log();
-            return 0;
-        }
+        return o instanceof Number ? ((Number) o).longValue()
+                : (long) getDouble(key);
     }
 
     /**
@@ -729,14 +714,6 @@ public class JSONObject {
     public Iterator<String> keys() {
         return this.map.keySet().iterator();
     }
-
-    /**
-     * Log out this object as json for debug purposes.
-     */
-    public void log() {
-        LOG.info(this.toString());
-    }
-
 
     /**
      * Get the number of keys stored in the JSONObject.
